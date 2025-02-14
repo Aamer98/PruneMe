@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # Define your model path
-model_path = "./merged"  # or the path/model_name you have
+model_path = "/ephemeral/amin/aamer/repos/PruneMe/logs"  # or the path/model_name you have
 
 # Your custom quantization configuration
 quantization_config = BitsAndBytesConfig(load_in_4bit=True,
@@ -11,10 +11,11 @@ quantization_config = BitsAndBytesConfig(load_in_4bit=True,
                                          bnb_4bit_compute_dtype=torch.bfloat16)
 
 # Load the model and tokenizer
-model = AutoModelForCausalLM.from_pretrained(model_path,  
-                                             device_map="auto", 
-                                             quantization_config=quantization_config, 
-                                             output_hidden_states=True)
+model = AutoModelForCausalLM.from_pretrained(model_path,
+                                             device_map="auto",
+                                             quantization_config=quantization_config,
+                                             output_hidden_states=True,
+                                             return_dict_in_generate=True)
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
 # Function to generate text
@@ -26,8 +27,9 @@ def generate_text(input_text):
     output = model.generate(input_ids, max_length=50, num_return_sequences=1)
 
     # Decode the generated tokens to a readable text
-    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-    
+    # breakpoint()
+    generated_text = tokenizer.decode(output[0][0].tolist(), skip_special_tokens=True)
+
     return generated_text
 
 # Example usage
